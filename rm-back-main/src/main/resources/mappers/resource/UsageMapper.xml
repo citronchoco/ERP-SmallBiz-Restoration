@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD MyBatis 3 Mapper//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.rm.mapper.resource.UsageMapper">
+<insert id="createUsage" parameterType="com.rm.dto.resource.Usage">
+	INSERT INTO rm_usage
+	(usage_status,
+	resource_id,
+	resource_user_name, 
+	resource_user_phone, 
+	resource_user_email, 
+	resource_user_note, 
+	usage_st, 
+	usage_ed)
+	VALUES (#{usageStatus},
+	#{resourceId},
+	#{resourceUserName},
+	#{resourceUserPhone},
+	#{resourceUserEmail},
+	#{resourceUserNote},
+	#{usageSt},
+	#{usageEd})
+</insert>
+
+<select id="getFutureUsageInfo" parameterType="Long" resultType="com.rm.dto.resource.Usage">
+	<![CDATA[
+	select * from rm_usage a
+    where a.usage_id != (
+		select usage_id from rm_usage where (
+			(usage_st <= CURDATE() AND usage_ed >= CURDATE())  -- 현재 사용 중인 항목
+	        OR (usage_st > CURDATE())
+	    ) and resource_id = #{resourceId} order by usage_st limit 1
+	) 
+    and a.resource_id = #{resourceId} and usage_st >= now()
+    order by usage_st asc;
+	]]>
+</select>
+<update id="updateUsageInfo" parameterType="com.rm.dto.resource.Usage" >
+	UPDATE rm_usage
+	SET
+	usage_status = #{usageStatus},
+	resource_user_name = #{resourceUserName},
+	resource_user_phone = #{resourceUserPhone},
+	resource_user_email = #{resourceUserEmail},
+	resource_user_note = #{resourceUserNote},
+	usage_st = #{usageSt},
+	usage_ed = #{usageEd}
+	WHERE usage_id = #{usageId}
+</update>
+<select id="getDisabledDate" parameterType="long" resultType="java.time.LocalDate">
+	<![CDATA[
+	WITH RECURSIVE date_sequence AS (
+	  -- 초기 날짜: 모든 usage_st를 기준으로 시작
+	  SELECT 
+	    usage_id,
+	    resource_id,
+	    usage_status,
+	    resource_user_name,
+	    resource_user_phone,
+	    resource_user_email,
+	    resource_user_note,
+	    usage_st,
+	    usage_ed,
+	    usage_st AS usage_date
+	  FROM rm_usage where resource_id = #{resourceId}
+	
+	  UNION ALL
+	  
+  	  -- usage_date가 usage_ed보다 작을 때까지 하루씩 증가	
+	  SELECT 
+	    ds.usage_id,
+	    ds.resource_id,
+	    ds.usage_status,
+	    ds.resource_user_name,
+	    ds.resource_user_phone,
+	    ds.resource_user_email,
+	    ds.resource_user_note,
+	    ds.usage_st,
+	    ds.usage_ed,
+	    DATE_ADD(ds.usage_date, INTERVAL 1 DAY)
+	  FROM date_sequence ds
+	  WHERE DATE_ADD(ds.usage_date, INTERVAL 1 DAY) <= ds.usage_ed and resource_id = #{resourceId}
+	)
+	
+	-- 결과 출력
+	SELECT 
+	distinct usage_date
+	FROM date_sequence
+	ORDER BY usage_date;
+	]]>
+</select>
+<select id="getDisabledDateExceptThis" parameterType="long" resultType="java.time.LocalDate">
+  <![CDATA[
+    	WITH RECURSIVE date_sequence AS (
+	  -- 초기 날짜: 모든 usage_st를 기준으로 시작
+	  SELECT 
+	    usage_id,
+	    resource_id,
+	    usage_status,
+	    resource_user_name,
+	    resource_user_phone,
+	    resource_user_email,
+	    resource_user_note,
+	    usage_st,
+	    usage_ed,
+	    usage_st AS usage_date
+	  FROM rm_usage where resource_id = 1 and usage_id != (select usage_id from rm_usage where (usage_st <= CURDATE() AND usage_ed >= CURDATE()  -- 현재 사용 중인 항목
+	        OR usage_st > CURDATE()) and resource_id = 1 order by usage_st limit 1) and usage_st >= now()
+	
+	  UNION ALL
+	  
+  	  -- usage_date가 usage_ed보다 작을 때까지 하루씩 증가	
+	  SELECT 
+	    ds.usage_id,
+	    ds.resource_id,
+	    ds.usage_status,
+	    ds.resource_user_name,
+	    ds.resource_user_phone,
+	    ds.resource_user_email,
+	    ds.resource_user_note,
+	    ds.usage_st,
+	    ds.usage_ed,
+	    DATE_ADD(ds.usage_date, INTERVAL 1 DAY)
+	  FROM date_sequence ds
+	  WHERE DATE_ADD(ds.usage_date, INTERVAL 1 DAY) <= ds.usage_ed and resource_id = 1
+	)
+	
+	-- 결과 출력
+	SELECT 
+	distinct usage_date
+	FROM date_sequence
+	ORDER BY usage_date;
+    ]]>
+</select>
+<delete id="deleteUsage" parameterType="Long">
+	DELETE FROM rm_usage
+	WHERE usage_id = #{usageId}
+</delete>
+<update id="updateUsageStatus">
+	<![CDATA[
+	UPDATE rm_usage
+	SET usage_status = 
+	  CASE 
+	    WHEN CURDATE() < usage_st THEN '예약'
+	    WHEN CURDATE() BETWEEN usage_st AND usage_ed THEN '사용중'
+	    WHEN CURDATE() > usage_ed THEN '사용 종료'
+	    ELSE usage_status -- 혹시 모를 예외 처리
+	  END;
+	]]>
+</update>
+<select id="getUsageHistory" parameterType="Long" resultType="com.rm.dto.resource.Usage">
+	<![CDATA[
+	select * from rm_usage
+	where (usage_ed < CURDATE()) and resource_id=#{resourceId}
+	order by usage_st asc;
+	]]>
+</select>
+</mapper>

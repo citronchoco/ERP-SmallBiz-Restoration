@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD MyBatis 3 Mapper//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.rm.mapper.resource.ResourceMapper">
+<insert id="createResource" parameterType="com.rm.dto.resource.Resource">
+	INSERT INTO rm_resource(
+		workplace_id,
+		resource_name,
+		place
+	)
+	VALUES (
+		#{workplaceId},
+		#{resourceName},
+		#{place}
+	)
+</insert>
+   <resultMap id="resourceResultMap" type="com.rm.dto.resource.Resource">
+       <id property="resourceId" column="resource_id" />
+       <result property="workplaceId" column="workplace_id" />
+       <result property="resourceName" column="resource_name" />
+       <result property="place" column="place" />
+       
+   
+       <!-- 1:N 관계 매핑 -->
+       <association property="resourceUsage" javaType="com.rm.dto.resource.Usage">
+           <id property="usageId" column="usage_id" />
+	       <result property="resourceId" column="usage_resource_id" />
+	       <result property="usageStatus" column="usage_status" />
+	       <result property="resourceUserName" column="resource_user_name" />
+	       <result property="resourceUserPhone" column="resource_user_phone" />
+	       <result property="resourceUserEmail" column="resource_user_email" />
+	       <result property="resourceUserNote" column="resource_user_note" />
+	       <result property="usageSt" column="usage_st" />
+	       <result property="usageEd" column="usage_ed" />
+       </association>
+   </resultMap>
+	<select id="getResourceList" parameterType="Long" resultMap="resourceResultMap">
+	    <![CDATA[
+	    SELECT
+	        r.resource_id,
+	        r.resource_name,
+	        r.place,
+	        u.usage_status,
+	        u.resource_user_name,
+	        u.resource_user_phone,	        
+	        u.usage_st,
+	        u.usage_ed
+	    FROM rm_resource r
+	    LEFT JOIN (
+	        SELECT 
+	            usage_id,
+	            resource_id,
+	            usage_status,
+	            resource_user_name,
+	            resource_user_phone,
+	            resource_user_email,
+	            resource_user_note,
+	            usage_st,
+	            usage_ed
+	        FROM rm_usage
+	        WHERE 
+	            (
+	                -- 현재 날짜가 usage_st와 usage_ed 사이에 포함되는 경우
+	                (usage_st <= CURDATE() AND usage_ed >= CURDATE())
+	                
+	                -- 또는 usage_st가 현재 시간과 가장 가까운 경우 (미래에 예약된 경우)
+	                OR (usage_st > CURDATE())
+	            )
+	            AND resource_id IN (
+	                -- 각 resource_id별로 가장 가까운 사용 내역을 선택
+	                SELECT resource_id
+	                FROM rm_usage
+	                WHERE 
+	                    (usage_st <= CURDATE() AND usage_ed >= CURDATE())
+	                OR (usage_st > CURDATE())
+	                GROUP BY resource_id
+	                HAVING usage_st = MIN(usage_st)  -- 가장 가까운 usage_st를 가진 레코드 선택
+	            )
+	        ORDER BY resource_id, usage_st
+	    ) u ON r.resource_id = u.resource_id 
+	    WHERE r.workplace_id = #{workplaceId}
+	    ORDER BY r.resource_id ASC;
+	 ]]>
+	</select>
+	<select id="getResourceNamePlace" parameterType="long" resultType="com.rm.dto.resource.Resource">
+		SELECT resource_name, place
+		FROM rm_resource
+		WHERE resource_id = #{resourceId};
+	</select>
+<select id="getResourceInfo" parameterType="Long" resultMap="resourceResultMap">
+	<![CDATA[
+	    SELECT
+	    	r.workplace_id,
+	        r.resource_id,
+	        r.resource_name,
+	        r.place,
+	        u.usage_id,
+	        u.usage_status,
+	        u.resource_user_name,
+	        u.resource_user_phone,
+	        u.resource_user_email,
+	        u.resource_user_note,
+	        u.usage_st,
+	        u.usage_ed
+	    FROM rm_resource r
+	    LEFT JOIN (
+	        SELECT 
+	            usage_id,
+	            resource_id,
+	            usage_status,
+	            resource_user_name,
+	            resource_user_phone,
+	            resource_user_email,
+	            resource_user_note,
+	            usage_st,
+	            usage_ed
+	        FROM rm_usage
+	        WHERE 
+	            (
+	                -- 현재 날짜가 usage_st와 usage_ed 사이에 포함되는 경우
+	                (usage_st <= CURDATE() AND usage_ed >= CURDATE())
+	                
+	                -- 또는 usage_st가 현재 시간과 가장 가까운 경우 (미래에 예약된 경우)
+	                OR (usage_st > CURDATE())
+	            )
+	            AND resource_id IN (
+	                -- 각 resource_id별로 가장 가까운 사용 내역을 선택
+	                SELECT resource_id
+	                FROM rm_usage
+	                WHERE 
+	                    (usage_st <= CURDATE() AND usage_ed >= CURDATE())
+	                OR (usage_st > CURDATE())
+	                GROUP BY resource_id
+	                HAVING usage_st = MIN(usage_st)  -- 가장 가까운 usage_st를 가진 레코드 선택
+	            )
+	        ORDER BY resource_id, usage_st
+	    ) u ON r.resource_id = u.resource_id 
+	    WHERE r.resource_id = #{resourceId}
+	 ]]>
+ </select>
+<update id="updateResource" parameterType="com.rm.dto.resource.Resource">
+	UPDATE rm_resource
+	SET
+	resource_name = #{resourceName},
+	place = #{place}
+	WHERE resource_id = #{resourceId};
+</update>
+</mapper>
