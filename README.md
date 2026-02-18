@@ -1,1 +1,30 @@
 # ERP-SmallBiz-Restoration
+
+*프로젝트 개요*
+본 프로젝트는 기존 ERP 시스템 도입에 어려움을 겪는 소상공인들을 지원하기 위해 개발된 무료 자원 관리 플랫폼입니다. 재고 관리 및 실시간 데이터 처리를 위한 백엔드 API 서버 로직을 포함하고 있습니다. 그룹 프로젝트로 진행되었으며, 현재 저장소는 프로젝트의 기술적 기록을 보존하기 위한 개인 아카이브입니다.
+
+*아카이브 공지 (Project Restoration)*
+- 상태: 원본 공유 저장소의 예기치 못한 데이터 유실 및 관리 기록 삭제로 인해, 본인이 로컬에 보유하고 있던 백업본을 바탕으로 복구한 저장소입니다.
+
+- 복구 사유: 협업 과정에서 발생한 원본 저장소의 히스토리 소실 사고에도 불구하고, 프로젝트의 전체 구조와 본인이 기여한 데이터베이스 설계 및 백엔드 로직을 보호하기 위해 긴급히 아카이브를 구축했습니다.
+
+- 구성: 본 아카이브는 프로젝트 전체의 연속성을 위해 프론트엔드와 백엔드 소스 코드를 모두 포함하고 있습니다.
+
+*기술 스택 (Tech Stack)*
+Backend: Java, Spring Boot
+
+Frontend: Vue.js (JavaScript, HTML, CSS)
+
+Database: MySQL
+
+Design Tool: MySQL Workbench (ERD 설계)
+
+*주요 기여 내용 (Key Contributions)*
+
+
+*프로젝트 구조*
+backend/: Spring Boot 기반 백엔드 소스 코드
+
+frontend/: 사용자 인터페이스 구현 코드
+
+ERD.mwb: MySQL Workbench를 활용한 데이터베이스 설계 원본 파일
