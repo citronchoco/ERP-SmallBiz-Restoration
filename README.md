@@ -11,7 +11,7 @@
 
 - 구성: 본 아카이브는 프로젝트 전체의 연속성을 위해 프론트엔드와 백엔드 소스 코드를 모두 포함하고 있습니다.
 
-**기술 스택 (Tech Stack)**
+### 기술 스택 (Tech Stack)
 
 Backend: Java, Spring Boot
 
@@ -21,7 +21,7 @@ Database: MySQL
 
 Design Tool: MySQL Workbench (ERD 설계)
 
-**주요 기여 내용 (Key Contributions)**
+### 주요 기여 내용 (Key Contributions)
 
 1. 자원 관리 및 상태 자동화 엔진 설계 (Full-stack)
 
