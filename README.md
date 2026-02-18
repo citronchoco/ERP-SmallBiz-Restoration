@@ -11,7 +11,7 @@
 
 - 구성: 본 아카이브는 프로젝트 전체의 연속성을 위해 프론트엔드와 백엔드 소스 코드를 모두 포함하고 있습니다.
 
-### 기술 스택 (Tech Stack)
+### Tech Stack
 
 Backend: Java, Spring Boot
 
@@ -21,7 +21,9 @@ Database: MySQL
 
 Design Tool: MySQL Workbench (ERD 설계)
 
-### 주요 기여 내용 (Key Contributions)
+<br>
+
+### 주요 기여 내용
 
 1. 자원 관리 및 상태 자동화 엔진 설계 (Full-stack)
 
@@ -33,7 +35,7 @@ Design Tool: MySQL Workbench (ERD 설계)
 
 2. 데이터베이스 정규화 및 무결성 확보
 
-RDB 설계 및 정규화: 사업장(rm_workplace)에 종속된 자원들이 독립적인 이용 상태를 가질 수 있도록 관계형 데이터 모델을 정규화하고, **Recursive CTE(재귀 쿼리)**를 활용해 중복 예약을 차단하는 유효성 검사 로직을 구축했습니다.
+RDB 설계 및 정규화: 사업장(rm_workplace)에 종속된 자원들이 독립적인 이용 상태를 가질 수 있도록 관계형 데이터 모델을 정규화하고, Recursive CTE를 활용해 중복 예약을 차단하는 유효성 검사 로직을 구축했습니다.
 
 3. 위기 대응 및 기술 자산 보존
 
